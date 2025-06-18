@@ -17,7 +17,14 @@ export const apiRoutes = {
   },
 
   admin: {
-
+    users: {
+      getAll: `${API_BASE}/admin/users`,
+      create: `${API_BASE}/users`,
+      getById: (id: string) => `${API_BASE}/admin/users/${id}`,
+      update: (id: string) => `${API_BASE}/admin/users/${id}`,
+      delete: (id: string) => `${API_BASE}/admin/users/${id}`,
+      createGuest: `${API_BASE}/users/guest`,
+    },
   },
   patient:{
     completeProfile:{

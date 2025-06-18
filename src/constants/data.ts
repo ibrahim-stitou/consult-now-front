@@ -22,7 +22,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     title: 'Utilisateurs',
-    url: '/admin/utilisateurs',
+    url: '/admin/users',
     icon: 'users',
     isActive: false,
     shortcut: ['u', 's'],
