@@ -19,11 +19,13 @@ export const apiRoutes = {
   admin: {
     users: {
       getAll: `${API_BASE}/admin/users`,
-      create: `${API_BASE}/users`,
+      create: `${API_BASE}/admin/users`,
       getById: (id: string) => `${API_BASE}/admin/users/${id}`,
       update: (id: string) => `${API_BASE}/admin/users/${id}`,
       delete: (id: string) => `${API_BASE}/admin/users/${id}`,
       createGuest: `${API_BASE}/users/guest`,
+      validateDoctor: (id: string) => `${API_BASE}/admin/users/${id}/validate-doctor`,
+      rejectDoctor: (id: string) => `${API_BASE}/admin/users/${id}/reject-doctor`,
     },
   },
   patient:{
@@ -35,7 +37,11 @@ export const apiRoutes = {
 
   },
   medecin:{
-
+    profile: {
+      get: `${API_BASE}/medecin/profile`,
+      create: `${API_BASE}/medecin/profile`,
+      update: `${API_BASE}/medecin/profile`,
+    },
   },
 guest:{
   addGuest: `${API_BASE}/users/guest`

@@ -49,6 +49,14 @@ export const medecinNavItems: NavItem[] = [
     items: []
   },
   {
+    title: 'Mon profil',
+    url: '/medecin/profile',
+    icon: 'user',
+    isActive: false,
+    shortcut: ['m', 'p'],
+    items: []
+  },
+  {
     title: 'Mes rendez-vous',
     url: '/medecin/rendez-vous',
     icon: 'calendar',
