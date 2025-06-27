@@ -6,7 +6,7 @@ import { fr } from 'date-fns/locale';
 import {
   Mail, Phone, UserCircle, Calendar, BadgeCheck, AlertCircle, Clock8,
   MapPin, Award, GraduationCap, Building, CreditCard, FileText,
-  ExternalLink, Download, Shield, Briefcase, FileIcon, CheckCircle
+  ExternalLink, Download, Shield, Briefcase, FileIcon, CheckCircle, XCircle
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import apiClient from '@/lib/api';
 import { apiRoutes } from '@/config/apiRoutes';
 
@@ -107,6 +109,8 @@ interface DoctorValidationDetailsProps {
 
 export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidationDetailsProps) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Non disponible';
@@ -146,7 +150,7 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
         return (
           <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
             <AlertCircle className="w-3.5 h-3.5 mr-1" />
-            Bloqué
+            Rejeté
           </Badge>
         );
       default:
@@ -198,7 +202,7 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
 
       // Vérifier le médecin
       const verifyResponse = await apiClient.put(
-        apiRoutes.admin.doctors.verify(user.doctor.id.toString())
+        apiRoutes.admin.users.validateDoctor(user.id.toString())
       );
 
       if (statusResponse.data.success && verifyResponse.data.success) {
@@ -216,14 +220,21 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
   };
 
   const handleRejectDoctor = async () => {
+    if (!rejectReason.trim()) {
+      toast.error("Le motif de rejet est obligatoire");
+      return;
+    }
+
     try {
       setIsUpdatingStatus(true);
-      const response = await apiClient.put(apiRoutes.admin.users.update(user.id.toString()), {
-        status: 'blocked'
+      const response = await apiClient.post(apiRoutes.admin.users.rejectDoctor(user.id.toString()), {
+        reason: rejectReason
       });
 
       if (response.data.success) {
         toast.success("La demande du médecin a été rejetée");
+        setIsRejectModalOpen(false);
+        setRejectReason('');
         if (onStatusChange) onStatusChange();
       } else {
         toast.error(response.data.message || "Une erreur est survenue");
@@ -250,9 +261,9 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
             variant="outline"
             className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
             disabled={isUpdatingStatus}
-            onClick={handleRejectDoctor}
+            onClick={() => setIsRejectModalOpen(true)}
           >
-            <AlertCircle className="mr-2 h-4 w-4" />
+            <XCircle className="mr-2 h-4 w-4" />
             Rejeter
           </Button>
           <Button
@@ -606,9 +617,9 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
                 variant="outline"
                 className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
                 disabled={isUpdatingStatus}
-                onClick={handleRejectDoctor}
+                onClick={() => setIsRejectModalOpen(true)}
               >
-                <AlertCircle className="mr-2 h-4 w-4" />
+                <XCircle className="mr-2 h-4 w-4" />
                 Rejeter la demande
               </Button>
               <Button
@@ -624,6 +635,47 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de rejet avec motif */}
+      <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rejeter la demande du médecin</DialogTitle>
+            <DialogDescription>
+              Veuillez indiquer le motif du rejet. Cette information sera communiquée au médecin.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Textarea
+              placeholder="Saisissez le motif du rejet (obligatoire)"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="min-h-[120px]"
+            />
+            {!rejectReason.trim() && (
+              <p className="text-sm text-red-500">Le motif est obligatoire</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsRejectModalOpen(false)}
+              disabled={isUpdatingStatus}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleRejectDoctor}
+              disabled={!rejectReason.trim() || isUpdatingStatus}
+            >
+              {isUpdatingStatus ? "Traitement en cours..." : "Confirmer le rejet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

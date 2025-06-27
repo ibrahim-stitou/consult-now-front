@@ -483,8 +483,10 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
             </div>
           </CardHeader>
           <CardContent className="p-6">
+            {/*//@ts-ignore*/}
             {doctor.media && doctor.media.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/*//@ts-ignore*/}
                 {doctor.media.map((doc) => (
                   <div key={doc.id} className="flex flex-col border rounded-md overflow-hidden bg-white hover:bg-slate-50 transition-colors group">
                     <div className="flex items-center p-4 gap-3 flex-1">
