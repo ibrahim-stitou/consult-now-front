@@ -139,6 +139,7 @@ export const Icons = {
   shoppingCart: IconShoppingCart,
   flame: IconFlame,
   template: IconTemplate,
+  userDoctor: IconUserCircle,
   bell: IconBell,
   calendarDays: IconCalendar,
   fileHeart:IconDeviceHeartMonitor,

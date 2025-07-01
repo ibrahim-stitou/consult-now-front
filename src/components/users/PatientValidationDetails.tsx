@@ -1,15 +1,21 @@
-// src/components/users/PatientDetails.tsx
+// src/components/users/PatientValidationDetails.tsx
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   Mail, Phone, UserCircle, Calendar, BadgeCheck, AlertCircle, Clock,
-  MapPin, Droplet, FileText, Shield, User, Ruler, Weight, Heart,
-  Pill, FileWarning, ChevronRight, XCircle
+  Shield, FileText, XCircle, CheckCircle, User
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import apiClient from '@/lib/api';
+import { apiRoutes } from '@/config/apiRoutes';
 
 interface UserRole {
   id: number;
@@ -51,11 +57,16 @@ interface User {
   patient: Patient;
 }
 
-interface PatientDetailsProps {
+interface PatientValidationDetailsProps {
   user: User;
+  onStatusChange?: () => void;
 }
 
-export const PatientDetails = ({ user }: PatientDetailsProps) => {
+export const PatientValidationDetails = ({ user, onStatusChange }: PatientValidationDetailsProps) => {
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Non disponible';
     try {
@@ -78,36 +89,36 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
     switch (status) {
       case 'validated':
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200">
-            <BadgeCheck className="w-3.5 h-3.5 mr-1" />
+          <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200">
+            <CheckCircle className="w-3.5 h-3.5 mr-1" />
             Validé
           </Badge>
         );
       case 'to_validate':
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200">
+          <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200">
             <Clock className="w-3.5 h-3.5 mr-1" />
-            À valider
+            En attente de validation
           </Badge>
         );
       case 'blocked':
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
+          <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
             <AlertCircle className="w-3.5 h-3.5 mr-1" />
             Bloqué
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
+          <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
             <XCircle className="w-3.5 h-3.5 mr-1" />
             Rejeté
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
-            Nouveau
+          <Badge className="bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200">
+            {status}
           </Badge>
         );
     }
@@ -124,8 +135,107 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
     }
   };
 
+  const handleValidatePatient = async () => {
+    try {
+      setIsUpdatingStatus(true);
+      // Mettre à jour le statut de l'utilisateur
+      const response = await apiClient.put(apiRoutes.admin.users.validateDoctor(user.id.toString()));
+
+      if (response.data.success) {
+        toast.success("Le patient a été validé avec succès");
+        if (onStatusChange) onStatusChange();
+      } else {
+        toast.error("Une erreur est survenue lors de la validation du patient");
+      }
+    } catch (error) {
+      console.error('Error validating patient:', error);
+      toast.error("Une erreur est survenue lors de la validation du patient");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleRejectPatient = async () => {
+    if (!rejectReason.trim()) {
+      toast.error("Le motif de rejet est obligatoire");
+      return;
+    }
+
+    try {
+      setIsUpdatingStatus(true);
+      const response = await apiClient.post(apiRoutes.admin.users.rejectDoctor(user.id.toString()), {
+        reason: rejectReason
+      });
+
+      if (response.data.success) {
+        toast.success("La demande du patient a été rejetée");
+        setIsRejectModalOpen(false);
+        setRejectReason('');
+        if (onStatusChange) onStatusChange();
+      } else {
+        toast.error(response.data.message || "Une erreur est survenue");
+      }
+    } catch (error) {
+      console.error('Error rejecting patient:', error);
+      toast.error("Une erreur est survenue lors du rejet de la demande");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* En-tête avec boutons d'action */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold">Validation du profil patient</h2>
+          <p className="text-muted-foreground">Examinez les informations pour valider ou rejeter la demande</p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
+            disabled={isUpdatingStatus}
+            onClick={() => setIsRejectModalOpen(true)}
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Rejeter
+          </Button>
+          <Button
+            variant="outline"
+            className="border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
+            disabled={isUpdatingStatus}
+            onClick={handleValidatePatient}
+          >
+            <BadgeCheck className="mr-2 h-4 w-4" />
+            Valider
+          </Button>
+        </div>
+      </div>
+
+      {/* Carte d'état de validation */}
+      <Card className="shadow-sm border-l-4 border-l-amber-400">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-50 rounded-full">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Demande de validation en attente</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Ce patient est en attente de validation par l'administration
+                </p>
+              </div>
+            </div>
+            <div className="ml-auto">
+              {getStatusBadge(user.status)}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header avec avatar et informations essentielles */}
       <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -280,7 +390,7 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
           <Card className="md:col-span-3 shadow-sm overflow-hidden">
             <CardHeader className="bg-slate-50 pb-3 pt-4">
               <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-blue-600" />
+                <FileText className="h-5 w-5 text-blue-600" />
                 <CardTitle className="text-lg font-medium">Informations médicales</CardTitle>
               </div>
             </CardHeader>
@@ -290,7 +400,6 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
                   <div className="space-y-1.5">
                     <p className="text-sm text-muted-foreground">Groupe sanguin</p>
                     <div className="bg-red-50 text-red-700 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium">
-                      <Droplet className="h-4 w-4" />
                       {user.patient.blood_group}
                     </div>
                   </div>
@@ -299,8 +408,7 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
                 {user.patient.height && (
                   <div className="space-y-1.5">
                     <p className="text-sm text-muted-foreground">Taille</p>
-                    <p className="font-medium flex items-center gap-2">
-                      <Ruler className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">
                       {user.patient.height} cm
                     </p>
                   </div>
@@ -309,8 +417,7 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
                 {user.patient.weight && (
                   <div className="space-y-1.5">
                     <p className="text-sm text-muted-foreground">Poids</p>
-                    <p className="font-medium flex items-center gap-2">
-                      <Weight className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">
                       {user.patient.weight} kg
                     </p>
                   </div>
@@ -342,21 +449,84 @@ export const PatientDetails = ({ user }: PatientDetailsProps) => {
                     </div>
                   </div>
                 )}
-
-                {!user.patient.allergies && !user.patient.chronic_diseases && !user.patient.current_medications && (
-                  <div className="md:col-span-3 p-6 border border-dashed rounded-md flex flex-col items-center justify-center text-center">
-                    <FileWarning className="h-10 w-10 text-muted-foreground mb-2 opacity-40" />
-                    <h3 className="text-muted-foreground font-medium">Aucune information médicale spécifique</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Le patient n'a pas encore renseigné ses informations médicales complètes.
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Section d'actions de validation */}
+      <Card className="shadow-sm border-t-4 border-t-blue-400">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Action requise</h3>
+            <p className="text-muted-foreground">
+              Veuillez valider ou rejeter la demande d'inscription de ce patient après avoir examiné ses informations.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
+                disabled={isUpdatingStatus}
+                onClick={() => setIsRejectModalOpen(true)}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Rejeter la demande
+              </Button>
+              <Button
+                variant="default"
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isUpdatingStatus}
+                onClick={handleValidatePatient}
+              >
+                <BadgeCheck className="mr-2 h-4 w-4" />
+                Valider ce patient
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Modal de rejet avec motif */}
+      <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rejeter la demande du patient</DialogTitle>
+            <DialogDescription>
+              Veuillez indiquer le motif du rejet. Cette information sera communiquée au patient.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Textarea
+              placeholder="Saisissez le motif du rejet (obligatoire)"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="min-h-[120px]"
+            />
+            {!rejectReason.trim() && (
+              <p className="text-sm text-red-500">Le motif est obligatoire</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsRejectModalOpen(false)}
+              disabled={isUpdatingStatus}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleRejectPatient}
+              disabled={!rejectReason.trim() || isUpdatingStatus}
+            >
+              {isUpdatingStatus ? "Traitement en cours..." : "Confirmer le rejet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

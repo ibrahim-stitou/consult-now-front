@@ -8,12 +8,12 @@ export const apiRoutes = {
     refreshToken: `${API_BASE}/refresh`,
     me: `${API_BASE}/me`,
     forgotPassword: `${API_BASE}/forgot-password`,
-    resetPassword: `${API_BASE}/reset-password`,
+    resetPassword: `${API_BASE}/reset-password`
   },
 
   files: {
     uploadTemp: `${API_BASE}/files/upload-temp`,
-    cleanupTemp: `${API_BASE}/files/cleanup-temp`,
+    cleanupTemp: `${API_BASE}/files/cleanup-temp`
   },
 
   admin: {
@@ -25,35 +25,40 @@ export const apiRoutes = {
       delete: (id: string) => `${API_BASE}/admin/users/${id}`,
       createGuest: `${API_BASE}/users/guest`,
       validateDoctor: (id: string) => `${API_BASE}/admin/users/${id}/validate-doctor`,
-      rejectDoctor: (id: string) => `${API_BASE}/admin/users/${id}/reject-doctor`,
-    },
+      rejectDoctor: (id: string) => `${API_BASE}/admin/users/${id}/reject-doctor`
+    }
   },
-  patient:{
-    completeProfile:{
-      get: `${API_BASE}/users/patient`,
-      update: `${API_BASE}/users/patient/update`,
-      addProfileData: `${API_BASE}/users/patient/addProfileData`,
+  patient: {
+    completeProfile: {
+      get: `${API_BASE}/patient/profile/getData`,
+      create: `${API_BASE}/patient/profile`,
+      update: `${API_BASE}/patient/profile/update`,
+      getDoctors: `${API_BASE}/patient/doctors`,
+    },
+    consultations:{
+      doctorBusyHours: (doctorId: string) => `${API_BASE}/patient/doctor/${doctorId}/busy-hours`,
+      addDemandeConsultation: `${API_BASE}/patient/demande-consultation`,
     }
 
   },
-  medecin:{
+  medecin: {
     profile: {
       get: `${API_BASE}/medecin/profile`,
       create: `${API_BASE}/medecin/profile`,
-      update: `${API_BASE}/medecin/profile`,
-    },
+      update: `${API_BASE}/medecin/profile`
+    }
   },
-guest:{
-  addGuest: `${API_BASE}/users/guest`
-},
+  guest: {
+    addGuest: `${API_BASE}/users/guest`
+  },
   common: {
     profile: {
       get: `${API_BASE}/user`,
       update: `${API_BASE}/profile`,
-      changePassword: `${API_BASE}/password`,
-    },
+      changePassword: `${API_BASE}/password`
+    }
 
-  },
+  }
 };
 
 export type ApiRoutes = typeof apiRoutes;

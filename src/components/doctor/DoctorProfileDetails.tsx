@@ -27,18 +27,27 @@ interface UserRole {
   created_at: string;
   updated_at: string;
 }
+interface Reject {
+  id: number;
+  reason: string;
+  rejectable_type: string;
+  rejectable_id: number;
+  created_at: string;
+  updated_at: string;
+}
 
 interface User {
   id: number;
   role_id: number;
   full_name: string;
-  telephone: string;
+  telephone: string | null;
   email: string;
-  status: 'new' | 'validated' | 'to_validate' | 'blocked';
+  status: 'new' | 'validated' | 'to_validate' | 'blocked' | 'rejected';
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
   role: UserRole;
+  rejects?: Reject[];
 }
 
 interface Doctor {
@@ -129,6 +138,13 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
             En attente de validation
           </Badge>
         );
+      case 'rejected':
+        return (
+          <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
+            <AlertCircle className="w-3.5 h-3.5 mr-1" />
+            Rejeté
+          </Badge>
+        );
       case 'blocked':
         return (
           <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
@@ -144,7 +160,6 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
         );
     }
   };
-
   const getDocumentTypeIcon = (docType: string | undefined) => {
     switch (docType?.toLowerCase()) {
       case 'medical':
@@ -263,7 +278,36 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
           </div>
         </div>
       </div>
-
+      {/* Afficher les raisons de rejet si le statut est "rejected" */}
+      {user.status === 'rejected' && doctor.user.rejects && doctor.user.rejects.length > 0 && (
+        <Card className="md:col-span-3 shadow-sm border-l-4 border-l-red-400">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-red-50 rounded-full">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium">Motifs de rejet</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Votre demande a été rejetée pour les raisons suivantes:
+                  </p>
+                </div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-md border border-red-100">
+                <ul className="space-y-2">
+                  {doctor.user.rejects.map((reject) => (
+                    <li key={reject.id} className="flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                      <span>{reject.reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Statut du profil */}
         <Card className="md:col-span-3 shadow-sm border-l-4 border-l-amber-400">
@@ -276,11 +320,15 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
                 <div>
                   <h3 className="text-lg font-medium">Statut de votre compte</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {user.status === 'to_validate'
-                      ? "Votre compte est en cours de vérification par notre équipe administrative"
-                      : user.status === 'validated'
-                        ? "Votre compte a été validé et est pleinement opérationnel"
-                        : "Votre compte est actuellement bloqué, veuillez contacter l'administration"}
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {user.status === 'to_validate'
+                        ? "Votre compte est en cours de vérification par notre équipe administrative"
+                        : user.status === 'validated'
+                          ? "Votre compte a été validé et est pleinement opérationnel"
+                          : user.status === 'rejected'
+                            ? "Votre compte a été rejeté, veuillez consulter les motifs ci-dessous"
+                            : "Votre compte est actuellement bloqué, veuillez contacter l'administration"}
+                    </p>
                   </p>
                 </div>
               </div>
@@ -378,13 +426,22 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
 
               <div className="space-y-1.5">
                 <p className="text-sm text-muted-foreground">Vérification du profil</p>
-                <div className={`mt-1 py-1.5 px-2.5 rounded-md ${doctor.is_verified
-                  ? 'bg-green-50 text-green-700'
-                  : 'bg-amber-50 text-amber-700'}`}>
+                <div className={`mt-1 py-1.5 px-2.5 rounded-md ${
+                  doctor.is_verified
+                    ? 'bg-green-50 text-green-700'
+                    : user.status === 'rejected'
+                      ? 'bg-red-50 text-red-700'
+                      : 'bg-amber-50 text-amber-700'
+                }`}>
                   {doctor.is_verified ? (
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                       <span className="font-medium">Vérifié le {formatDate(doctor.verified_at)}</span>
+                    </div>
+                  ) : user.status === 'rejected' ? (
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <span className="font-medium">Profil rejeté</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -548,8 +605,7 @@ export const DoctorProfileDetails = ({ user, doctor, documents = [], onEditClick
                 <p className="text-muted-foreground max-w-md mx-auto">
                   Aucun document n'a été téléchargé dans votre profil. Vous pouvez ajouter des documents en modifiant votre profil.
                 </p>
-                <Button onClick={onEditClick} variant="outline" className="mt-4">
-                  <FileText className="mr-2 h-4 w-4" />
+                <Button onClick={onEditClick} variant="outline" className="mt-4">c<FileText className="mr-2 h-4 w-4" />
                   Ajouter des documents
                 </Button>
               </div>

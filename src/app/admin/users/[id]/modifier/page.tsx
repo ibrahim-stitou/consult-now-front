@@ -68,7 +68,7 @@ export default function ModifierUtilisateur() {
         const response = await apiClient.get(apiRoutes.admin.users.getById(userId));
 
         if (response.data) {
-          const userData = response.data;
+          const userData = response.data.data;
 
           setValue('full_name', userData.full_name || '');
           setValue('email', userData.email || '');

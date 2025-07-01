@@ -20,6 +20,7 @@ import { apiRoutes } from '@/config/apiRoutes';
 import { UserBasicDetails } from '@/components/users/UserBasicDetails';
 import { DoctorValidationDetails } from '@/components/users/DoctorValidationDetails';
 import { DoctorValidatedDetails } from '@/components/users/DoctorValidatedDetails';
+import { PatientValidationDetails } from '@/components/users/PatientValidationDetails';
 import { PatientDetails } from '@/components/users/PatientDetails';
 import { AdminDetails } from '@/components/users/AdminDetails';
 
@@ -54,6 +55,16 @@ export default function UserDetails() {
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const refreshData = async () => {
+    try {
+
+      const response = await apiClient.get(apiRoutes.admin.users.getById(userId));
+      setUser(response.data.data);
+    } catch (error) {
+      console.error('Erreur lors de lactualisation des données:', error);
+      toast.error('Impossible de rafraîchir les données');
+    }
+  };
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -141,24 +152,39 @@ export default function UserDetails() {
     );
   }
 
-  // Détermine quel composant de détails afficher en fonction du rôle et du statut
+// Détermine quel composant de détails afficher en fonction du rôle et du statut
   const renderUserDetails = () => {
+    // Cas du médecin
     if (user.role.code === 'medecin') {
       if (user.status === 'to_validate') {
         return <DoctorValidationDetails
+          //@ts-ignore
           user={user}
-          onStatusChange={refreshUserData}
+          onStatusChange={refreshData}
         />;
       } else {
         return <DoctorValidatedDetails
           user={user}
         />;
       }
-    } else if (user.role.code === 'patient') {
-      return <PatientDetails
-        user={user}
-      />;
-    } else if (user.role.code === 'admin') {
+    }
+    // Cas du patient
+    else if (user.role.code === 'patient') {
+      if (user.status === 'to_validate') {
+        return <PatientValidationDetails
+          //@ts-ignore
+          user={user}
+          onStatusChange={refreshData}
+        />;
+      } else {
+        return <PatientDetails
+          //@ts-ignore
+          user={user}
+        />;
+      }
+    }
+    // Cas de l'administrateur
+    else if (user.role.code === 'admin') {
       return <AdminDetails
         user={user}
       />;

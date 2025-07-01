@@ -94,7 +94,7 @@ export const patientNavItems: NavItem[] = [
   },
   {
     title: 'Mon profil',
-    url: '/patient/profil',
+    url: '/patient/profile',
     icon: 'user',
     isActive: false,
     shortcut: ['m', 'p'],
@@ -109,13 +109,21 @@ export const patientNavItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Mes consultations',
-    url: '/patient/consultations',
-    icon: 'stethoscope',
+    title: 'Mes médecins',
+    url: '/patient/medecin',
+    icon: 'userDoctor',
     isActive: false,
-    shortcut: ['c', 's'],
+    shortcut: ['m', 'd'],
     items: []
-  }
+  },
+  {
+    title: 'Mes consultations',
+    url: '/patient/consultations/mes-consultations',
+    icon: 'fileText',
+    isActive: false,
+    shortcut: ['m', 'c'],
+    items: []
+  },
 ];
 
 // Fonction pour obtenir la navigation selon le rôle
