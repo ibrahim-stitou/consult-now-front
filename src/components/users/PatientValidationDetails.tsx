@@ -139,7 +139,7 @@ export const PatientValidationDetails = ({ user, onStatusChange }: PatientValida
     try {
       setIsUpdatingStatus(true);
       // Mettre à jour le statut de l'utilisateur
-      const response = await apiClient.put(apiRoutes.admin.users.validateDoctor(user.id.toString()));
+      const response = await apiClient.post(apiRoutes.admin.users.validateDoctor(user.id.toString()));
 
       if (response.data.success) {
         toast.success("Le patient a été validé avec succès");

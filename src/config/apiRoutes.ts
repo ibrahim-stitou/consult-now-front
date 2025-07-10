@@ -33,11 +33,16 @@ export const apiRoutes = {
       get: `${API_BASE}/patient/profile/getData`,
       create: `${API_BASE}/patient/profile`,
       update: `${API_BASE}/patient/profile/update`,
-      getDoctors: `${API_BASE}/patient/doctors`,
+      getDoctors: `${API_BASE}/patient/doctors`
     },
-    consultations:{
+    consultations: {
       doctorBusyHours: (doctorId: string) => `${API_BASE}/patient/doctor/${doctorId}/busy-hours`,
       addDemandeConsultation: `${API_BASE}/patient/demande-consultation`,
+      mesConsultations:`${API_BASE}/patient/consultations`,
+      getDetailsByTypeAndId: (type: string, id: string) => `${API_BASE}/patient/consultation/details/${type}/${id}`
+    },
+    doctors:{
+      get:(id: string) => `${API_BASE}/patient/mes-medecins/${id}`
     }
 
   },
@@ -45,11 +50,29 @@ export const apiRoutes = {
     profile: {
       get: `${API_BASE}/medecin/profile`,
       create: `${API_BASE}/medecin/profile`,
-      update: `${API_BASE}/medecin/profile`
+      update: `${API_BASE}/medecin/profile`,
+      getSpecialities: `${API_BASE}/medecin/profile/specialities`
+    },
+    consultations: {
+      getAll: `${API_BASE}/medecin/consultations`,
+      getById: (id: string) => `${API_BASE}/medecin/consultations/${id}`,
+      create: `${API_BASE}/medecin/consultations`,
+      update: (id: string) => `${API_BASE}/medecin/consultations/${id}`,
+      delete: (id: string) => `${API_BASE}/medecin/consultations/${id}`
+    },
+    demandesConsultation: {
+      getAll: `${API_BASE}/medecin/demandes-consultation`,
+      reject: (id: string) => `${API_BASE}/medecin/demandes-consultation/${id}/reject`,
+      validate: (id: string) => `${API_BASE}/medecin/demandes-consultation/${id}/validate`,
+      getDetailsByTypeAndId: (type: string, id: string) => `${API_BASE}/medecin/consultation/details/${type}/${id}`
+    },
+    calendrier:{
+      myconsultationsList: `${API_BASE}/medecin/calendrier/my-consultations-list`,
+      recentEvents: `${API_BASE}/medecin/calendrier/recent-events`,
     }
   },
   guest: {
-    addGuest: `${API_BASE}/users/guest`
+    addGuest: `${API_BASE}/guest`
   },
   common: {
     profile: {

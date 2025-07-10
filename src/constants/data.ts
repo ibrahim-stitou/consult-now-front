@@ -118,7 +118,7 @@ export const patientNavItems: NavItem[] = [
   },
   {
     title: 'Mes consultations',
-    url: '/patient/consultations/mes-consultations',
+    url: '/patient/consultation/mes-consultation',
     icon: 'fileText',
     isActive: false,
     shortcut: ['m', 'c'],

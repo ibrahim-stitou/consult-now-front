@@ -285,7 +285,7 @@ export default function NewConsultation() {
 
       if (response.data.success) {
         toast.success("Demande de consultation envoyée avec succès");
-        router.push('/patient/consultations/mes-consultations');
+        router.push('/patient/consultation/mes-consultation');
       } else {
         toast.error(response.data.message || "Une erreur est survenue");
       }

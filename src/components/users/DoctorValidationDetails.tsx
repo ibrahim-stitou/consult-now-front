@@ -196,16 +196,10 @@ export const DoctorValidationDetails = ({ user, onStatusChange }: DoctorValidati
     try {
       setIsUpdatingStatus(true);
       // Mettre à jour le statut de l'utilisateur
-      const statusResponse = await apiClient.put(apiRoutes.admin.users.update(user.id.toString()), {
+      const statusResponse = await apiClient.post(apiRoutes.admin.users.validateDoctor(user.id.toString()), {
         status: 'validated'
       });
-
-      // Vérifier le médecin
-      const verifyResponse = await apiClient.put(
-        apiRoutes.admin.users.validateDoctor(user.id.toString())
-      );
-
-      if (statusResponse.data.success && verifyResponse.data.success) {
+      if (statusResponse.data.success ) {
         toast.success("Le médecin a été validé avec succès");
         if (onStatusChange) onStatusChange();
       } else {

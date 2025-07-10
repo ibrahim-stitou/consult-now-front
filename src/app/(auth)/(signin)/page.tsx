@@ -25,6 +25,7 @@ import { motion } from "@/components/motion";
 import apiClient from '@/lib/api';
 import { apiRoutes } from '@/config/apiRoutes';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 // Variantes d'animation pour différents éléments
 const fadeIn = {
@@ -82,6 +83,7 @@ export default function Page() {
     setLoading(true);
 
     try {
+      // Utiliser l'instance apiClient configurée au lieu d'axios directement
       await apiClient.post(apiRoutes.guest.addGuest, { email });
       setLoading(false);
       setSubscribed(true);
@@ -91,11 +93,24 @@ export default function Page() {
       setLoading(false);
       console.error("Erreur lors de l'ajout du guest:", error);
 
-      // Gestion spécifique pour l'email déjà utilisé
-      if (error.response?.data?.errors?.email?.[0] === "The email has already been taken.") {
+      // Ajout de log pour déboguer
+      console.log("URL appelée:", apiRoutes.guest.addGuest);
+      console.log("Détails de l'erreur:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+
+      // Gestion des erreurs
+      if (error.response?.data?.message === "The email has already been taken." ||
+        error.response?.data?.errors?.email?.[0] === "The email has already been taken.") {
         toast.error("Cet email est déjà enregistré dans notre système.");
       } else {
-        toast.error("Une erreur est survenue. Veuillez réessayer plus tard.");
+        // Message d'erreur plus précis
+        const errorMessage = error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Une erreur est survenue. Veuillez réessayer plus tard.";
+        toast.error(errorMessage);
       }
     }
   };
