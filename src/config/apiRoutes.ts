@@ -43,7 +43,8 @@ export const apiRoutes = {
     },
     doctors:{
       get:(id: string) => `${API_BASE}/patient/mes-medecins/${id}`
-    }
+    },
+    recentFourEvents: `${API_BASE}/patient/recent-events`
 
   },
   medecin: {
@@ -69,6 +70,9 @@ export const apiRoutes = {
     calendrier:{
       myconsultationsList: `${API_BASE}/medecin/calendrier/my-consultations-list`,
       recentEvents: `${API_BASE}/medecin/calendrier/recent-events`,
+    },
+    petients:{
+      list: `${API_BASE}/medecin/patients`,
     }
   },
   guest: {
