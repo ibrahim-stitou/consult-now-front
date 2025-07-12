@@ -27,14 +27,6 @@ export const adminNavItems: NavItem[] = [
     isActive: false,
     shortcut: ['u', 's'],
     items: []
-  },
-  {
-    title: 'Paramètres',
-    url: '/admin/parametres',
-    icon: 'settings',
-    isActive: false,
-    shortcut: ['p', 'a'],
-    items: []
   }
 ];
 
