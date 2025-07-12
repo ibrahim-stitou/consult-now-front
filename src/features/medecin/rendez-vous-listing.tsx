@@ -34,6 +34,7 @@ interface RendezVous {
   patient_name: string;
   type: 'Consultation' | 'Demande';
   actions: number;
+  meet_url:string;
 }
 
 export function RendezVousListing() {
@@ -265,18 +266,24 @@ export function RendezVousListing() {
           {row.type === 'Consultation' && row.status === 'scheduled' && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 bg-blue-100 p-1.5 text-blue-600 hover:bg-blue-200"
-                  onClick={() => router.push(`/medecin/consultations/${row.id}`)}
+                <a
+                  href={row.meet_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <Clock className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="h-8 w-8 bg-blue-100 p-1.5 text-blue-600 hover:bg-blue-200"
+                  >
+                    <Clock className="h-4 w-4" />
+                  </Button>
+                </a>
               </TooltipTrigger>
               <TooltipContent>
-                Démarrer la consultation
+                Vers la consultation
               </TooltipContent>
             </Tooltip>
+
           )}
         </div>
       )

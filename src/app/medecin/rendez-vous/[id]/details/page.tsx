@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import AddMedicalRecordModal from '@/components/medical/AddMedicalRecordModal';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -76,6 +77,8 @@ export default function DetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
+  const [openMedicalModal, setOpenMedicalModal] = useState(false);
+  const [medicalLoading, setMedicalLoading] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
@@ -341,13 +344,25 @@ export default function DetailsPage() {
             title={renderPageTitle()}
             description={detailsData?.title || ""}
           />
-          <Button
-            variant="outline"
-            onClick={() => router.push('/medecin/rendez-vous')}
-            className="flex items-center gap-2 hover:bg-slate-100 transition-colors border-slate-200"
-          >
-            <ArrowLeft className="h-4 w-4" /> Retour
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/medecin/rendez-vous')}
+              className="flex items-center gap-2 hover:bg-slate-100 transition-colors border-slate-200"
+            >
+              <ArrowLeft className="h-4 w-4" /> Retour
+            </Button>
+            {type === 'consultation' && (
+              <Button
+                variant="default"
+                onClick={() => setOpenMedicalModal(true)}
+                className="flex items-center gap-2 hover:bg-blue-100 transition-colors border-blue-200"
+              >
+                Inérer dans dossier médical
+              </Button>
+            )}
+          </div>
+
         </div>
         <Separator className="my-2" />
 
@@ -711,6 +726,28 @@ export default function DetailsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AddMedicalRecordModal
+        open={openMedicalModal}
+        onClose={() => setOpenMedicalModal(false)}
+        loading={medicalLoading}
+        onSubmit={async (formData) => {
+          setMedicalLoading(true);
+          try {
+            await apiClient.post(
+              //@ts-ignore
+              apiRoutes.medecin.medicalRecords.create(detailsData.id.toString()),
+              formData,
+              { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            toast.success('Entrée médicale ajoutée avec succès');
+            setOpenMedicalModal(false);
+          } catch (e: any) {
+            toast.error(e.response?.data?.message || "Erreur lors de l'ajout");
+          } finally {
+            setMedicalLoading(false);
+          }
+        }}
+      />
     </PageContainer>
   );
 }

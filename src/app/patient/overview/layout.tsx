@@ -277,7 +277,7 @@ export default function PtientDashboard() {
                 <Calendar className="h-10 w-10 text-gray-300 mb-3" />
                 <h3 className="font-medium text-gray-900">Aucun événement récent</h3>
                 <p className="text-sm text-gray-500 mt-1 mb-4">Vous n'avez pas encore de consultations ou de demandes</p>
-                <Button onClick={() => router.push('patient/consultation/new')}>
+                <Button onClick={() => router.push('/patient/consultation/new')}>
                   Demander une consultation
                 </Button>
               </CardContent>

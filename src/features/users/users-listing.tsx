@@ -176,37 +176,6 @@ export function UsersListing() {
               Modifier
             </TooltipContent>
           </Tooltip>
-
-          {row.status !== 'validated' ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 bg-green-100 p-1.5 text-green-600 hover:bg-green-200"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                Valider l'utilisateur
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 bg-orange-100 p-1.5 text-orange-600 hover:bg-orange-200"
-                >
-                  <XCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                Bloquer l'utilisateur
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

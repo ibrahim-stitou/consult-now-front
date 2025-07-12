@@ -109,6 +109,14 @@ export const patientNavItems: NavItem[] = [
     items: []
   },
   {
+    title: 'Mon dossier médical',
+    url: '/patient/dossier-medical',
+    icon: 'fileText',
+    isActive: false,
+    shortcut: ['d', 'o'],
+    items: []
+  },
+  {
     title: 'Mes médecins',
     url: '/patient/medecin',
     icon: 'userDoctor',

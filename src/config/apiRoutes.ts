@@ -35,6 +35,9 @@ export const apiRoutes = {
       update: `${API_BASE}/patient/profile/update`,
       getDoctors: `${API_BASE}/patient/doctors`
     },
+    medicalRecords: {
+      myMedicalRecords: `${API_BASE}/patient/medical-record/all-entries-with-media`
+    },
     consultations: {
       doctorBusyHours: (doctorId: string) => `${API_BASE}/patient/doctor/${doctorId}/busy-hours`,
       addDemandeConsultation: `${API_BASE}/patient/demande-consultation`,
@@ -45,7 +48,6 @@ export const apiRoutes = {
       get:(id: string) => `${API_BASE}/patient/mes-medecins/${id}`
     },
     recentFourEvents: `${API_BASE}/patient/recent-events`
-
   },
   medecin: {
     profile: {
@@ -73,7 +75,15 @@ export const apiRoutes = {
     },
     petients:{
       list: `${API_BASE}/medecin/patients`,
-    }
+    },
+    medicalRecords: {
+      list: `${API_BASE}/medical-records`,
+      getByPatientId: (patientId: string) => `${API_BASE}/medecin/medical-records/${patientId}`,
+      getEntry: (entryId: string) => `${API_BASE}/medecin/medical-records/entry/${entryId}`,
+      create: (consultationId: string) => `${API_BASE}/medecin/medical-records/consultation/${consultationId}`,
+      update: (entryId: string) => `${API_BASE}/medecin/medical-records/entry/${entryId}`,
+    },
+
   },
   guest: {
     addGuest: `${API_BASE}/guest`
@@ -84,7 +94,6 @@ export const apiRoutes = {
       update: `${API_BASE}/profile`,
       changePassword: `${API_BASE}/password`
     }
-
   }
 };
 
