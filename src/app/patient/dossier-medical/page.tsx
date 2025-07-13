@@ -98,7 +98,7 @@ export default function MyMedicalRecord() {
   if (loading) {
     return (
       <PageContainer>
-        <div className="space-y-6">
+        <div className="space-y-6 w-full">
           <div>
             <Skeleton className="h-8 w-2/3 mb-2" />
             <Skeleton className="h-4 w-1/2" />
